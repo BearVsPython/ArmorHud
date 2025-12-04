@@ -1,0 +1,14 @@
+{
+  "armorhud.configuration.horizontalOffset": "Horizontal Offset",
+  "armorhud.configuration.verticalOffset": "Vertical Offset",
+  "armorhud.configuration.layoutStyle": "Layout Style",
+  "armorhud.configuration.layoutStyle.HORIZONTAL": "Horizontal",
+  "armorhud.configuration.layoutStyle.VERTICAL": "Vertical",
+  "armorhud.configuration.verticalAnchor": "Vertical Anchor",
+  "armorhud.configuration.horizontalAnchor": "Horizontal Anchor",
+  "armorhud.configuration.scale": "Scale",
+  "armorhud.configuration.spacing": "Spacing",
+  "armorhud.configuration.showHotbarSlot": "Show Hotbar",
+  "armorhud.configuration.showDurabilityBar": "Show Durability",
+  "armorhud.configuration.visible": "Show Armor HUD"
+}

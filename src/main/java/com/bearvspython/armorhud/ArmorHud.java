@@ -19,15 +19,9 @@ public class ArmorHud {
     public ArmorHud(IEventBus modEventBus, ModContainer container) {
         // Allows NeoForge to create a config screen for this mod's configs.
         // The config screen is accessed by going to the Mods screen > clicking on your mod > clicking on config.
-        // Do not forget to add translations for your config options to the en_us.json file.
         container.registerConfig(ModConfig.Type.CLIENT, Config.SPEC);
         modEventBus.addListener(this::onRegisterHudHandler);
         container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
-    }
-
-    @SubscribeEvent
-    public void onClientSetup(FMLClientSetupEvent event) {
-
     }
 
     @SubscribeEvent
