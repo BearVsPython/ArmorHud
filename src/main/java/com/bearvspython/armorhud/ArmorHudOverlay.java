@@ -81,51 +81,54 @@ public class ArmorHudOverlay {
                     itemCount++;
                 }
             }
-            int total;
+
+            int centeringOffsetX = 0;
+            int centeringOffsetY = 0;
+
             if (isVertical) {
                 if (showItemSlot) {
-                    total = (int) (itemCount * ((((ITEM_SLOT_TEXTURE_HEIGHT * scale) - (ITEM_ICON_SIZE * scale)) + spacing)) - spacing);
+                    centeringOffsetX = (int) (ITEM_ICON_SIZE * scale/2);
                 } else {
-                    total = (int) (itemCount * ((ITEM_ICON_SIZE * scale) + spacing) - spacing);
+                    centeringOffsetX = (int) (ITEM_ICON_SIZE * scale/2);
                 }
-                yPosition += total / 2;
-                xPosition -= (int) ((ITEM_ICON_SIZE * scale) / 2);
             } else {
-                if (showItemSlot) {
-                    total = (int) ((itemCount * (((ITEM_SLOT_TEXTURE_WIDTH * scale) - (ITEM_ICON_SIZE * scale)) + spacing)) - spacing);
-                } else {
-                    total = (int) (itemCount * ((ITEM_ICON_SIZE * scale) + spacing) - spacing);
-                }
-                xPosition -= total/2;
-                yPosition -= (int) ((ITEM_ICON_SIZE * scale) / 2);
+
             }
 
 
-
+            //
+            xPosition -= centeringOffsetX;
+            yPosition -= centeringOffsetY;
             // Adjust starting position based on anchor points
             xPosition += xReference;
             yPosition += yReference;
 
 
 
+            guiGraphics.pose().pushMatrix();
+            guiGraphics.pose().translate(xPosition, yPosition);
+            guiGraphics.pose().scale(scale);
+
+            int xLeftExtent = xPosition;
+            int yBottomExtent = yPosition;
+
             int i = 0;
             for (ItemStack stack : armorStack) {
                 if (!stack.isEmpty()) {
-                    float xPos = (xPosition + (scale * (isVertical ? 0 : (i * (spacing + (showItemSlot ? ((ITEM_SLOT_TEXTURE_WIDTH) - 8) : ITEM_ICON_SIZE))))));
-                    float yPos = (yPosition + (scale * (isVertical ? - (i * (spacing + (showItemSlot ? ((ITEM_SLOT_TEXTURE_HEIGHT) - 3) : ITEM_ICON_SIZE))) : 0)));
 
-                    guiGraphics.pose().pushMatrix();
-                    guiGraphics.pose().translate(xPos, yPos);
-                    guiGraphics.pose().scale(scale);
+                    int xPos = (((isVertical ? 0 : (i * (spacing + (showItemSlot ? (21) : ITEM_ICON_SIZE))))));
+                    int yPos = (((isVertical ? - (i * (spacing + (showItemSlot ? (21) : ITEM_ICON_SIZE))) : 0)));
 
 
                     // Render item slot if enabled
                     if (showItemSlot) {
-                        guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, ITEM_SLOT_TEXTURE, -3, -4, ITEM_SLOT_TEXTURE_WIDTH, ITEM_SLOT_TEXTURE_HEIGHT);
+                        guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, ITEM_SLOT_TEXTURE, ITEM_SLOT_TEXTURE_WIDTH, ITEM_SLOT_TEXTURE_HEIGHT, 0, 0, xPos-3, yPos-4, 22, 23);
                     }
 
                     // Render armor item
-                    guiGraphics.renderItem(stack, 0, 0);
+                    guiGraphics.renderItem(stack, xPos, yPos);
+
+                    // Render durability bar if enabled
                     if (showDurabilityBar && stack.isBarVisible()) {
 
                         int max = 14;
@@ -133,14 +136,23 @@ public class ArmorHudOverlay {
                         int x = (int) ((16 - max) / 2f);
                         int y = 13;
 
+                        x += xPos;
+                        y += yPos;
+
                         guiGraphics.fill(RenderPipelines.GUI, x, y, x + max, y + 2, -16777216);
                         guiGraphics.fill(RenderPipelines.GUI, x, y, x + barWidth, y + 1, ARGB.opaque(stack.getBarColor()));
                     }
 
-                    guiGraphics.pose().popMatrix();
                     i++;
                 }
             }
+
+            guiGraphics.pose().popMatrix();
+
+            // reference point for debugging
+            guiGraphics.fill(RenderPipelines.GUI, xReference - 1, yReference - 1, xReference + 2, yReference + 2, 0xFFFFFFFF);
+            // estimated bottom left extents for reference
+            guiGraphics.fill(RenderPipelines.GUI, xLeftExtent - 1, yBottomExtent - 1, xLeftExtent + 1, yBottomExtent + 1, 0xFFFF0000);
         }
     }
 
