@@ -42,31 +42,18 @@ public class ArmorHudOverlay {
             int screenWidth = mc.getWindow().getGuiScaledWidth();
             int screenHeight = mc.getWindow().getGuiScaledHeight();
 
-            // Calculate reference points based on anchor settings
-            int xReference;
-            switch (Config.horizontalAnchor.get()) {
-                case LEFT -> xReference = 0;
-                case CENTER -> xReference = (screenWidth / 2);
-                case RIGHT -> xReference = screenWidth;
-                default -> xReference = 0;
-            }
-
-            int yReference;
-            switch (Config.verticalAnchor.get()) {
-                case TOP -> yReference = 0;
-                case CENTER -> yReference = screenHeight / 2;
-                case BOTTOM -> yReference = screenHeight;
-                default -> yReference = 0;
-            }
 
             // Use config values
             float scale = Mth.clamp(Config.scale.get()/50f, 0.25f, 2f);
             int spacing = Config.spacing.getAsInt();
             boolean isVertical = Config.layoutStyle.get() == Config.LayoutStyle.VERTICAL;
             boolean showDurabilityBar = Config.showDurabilityBar.getAsBoolean();
+            boolean showDurabilityNumber = Config.durabilityNumber.get() != Config.DurabilityNumber.OFF;
+            Config.DurabilityNumber durabilityNumber = Config.durabilityNumber.get();
+            Config.DurabilityNumberColor durabilityNumberColor = Config.durabilityNumberColor.get();
             boolean showItemSlot = Config.showHotbarSlot.getAsBoolean();
-            float yPosition = (float) (double) Config.verticalOffset.get();
-            float xPosition = (float) (double) Config.horizontalOffset.get();
+            float yPosition = 0f;
+            float xPosition = 0f;
 
             // Get armor items
             int itemCount = 0;
@@ -111,6 +98,47 @@ public class ArmorHudOverlay {
             xPosition -= centeringOffsetX;
             yPosition -= centeringOffsetY;
 
+            // Calculate reference points based on anchor settings
+            int xReference;
+            switch (Config.horizontalAnchor.get()) {
+                case LEFT -> {
+                    xReference = 0;
+                    xPosition += (float) (double) Config.horizontalOffset.get();
+                }
+                case CENTER -> {
+                    xReference = (screenWidth / 2);
+                    xPosition += (float) (double) Config.horizontalOffset.get();
+                }
+                case RIGHT -> {
+                    xReference = screenWidth;
+                    xPosition += (float) (double) -Config.horizontalOffset.get();
+                }
+                default -> {
+                    xReference = 0;
+                    xPosition += (float) (double) Config.horizontalOffset.get();
+                }
+            }
+
+            int yReference;
+            switch (Config.verticalAnchor.get()) {
+                case TOP -> {
+                    yReference = 0;
+                    yPosition += (float) (double) Config.verticalOffset.get();
+                }
+                case CENTER -> {
+                    yReference = screenHeight / 2;
+                    yPosition += (float) (double) Config.verticalOffset.get();
+                }
+                case BOTTOM -> {
+                    yReference = screenHeight;
+                    yPosition += (float) (double) -Config.verticalOffset.get();
+                }
+                default -> {
+                    yReference = 0;
+                    yPosition += (float) (double) Config.verticalOffset.get();
+                }
+            }
+
             // Adjust starting position based on anchor points
             xPosition += xReference;
             yPosition += yReference;
@@ -154,6 +182,48 @@ public class ArmorHudOverlay {
                         guiGraphics.fill(RenderPipelines.GUI, x, y, x + barWidth, y + 1, ARGB.opaque(stack.getBarColor()));
                     }
 
+                    if (showDurabilityNumber) {
+
+                        String durabilityString = "";
+                        float durabilityScale = 1f;
+                        switch (durabilityNumber) {
+                            case NUMBER_ONLY -> {
+                                durabilityString = String.valueOf(stack.getMaxDamage() - stack.getDamageValue());
+                                durabilityScale = 0.6f;
+                            }
+                            case NUMBER_AND_MAX -> {
+                                durabilityString = (stack.getMaxDamage() - stack.getDamageValue()) + "/" + stack.getMaxDamage();
+                                durabilityScale = 0.365f;
+                            }
+                            case PERCENTAGE -> {
+                                int percent = Math.round(((float)(stack.getMaxDamage() - stack.getDamageValue()) / (float)stack.getMaxDamage()) * 100f);
+                                durabilityString = percent + "%";
+                                durabilityScale = 0.6f;
+                            }
+                        }
+                        int darkColor = 0xFF101010;
+                        int lightColor = 0xFFFFFFFF;
+                        int color = 0xFFFFFFFF;
+                        switch (durabilityNumberColor) {
+                            case WHITE -> color = lightColor;
+                            case BLACK -> color = darkColor;
+                            case MATCH_DURABILITY_BAR -> color = ARGB.opaque(stack.getBarColor());
+                            case AUTO -> {
+                                color = lightColor;
+                                if (!showDurabilityBar) {
+                                    color = ARGB.opaque(stack.getBarColor());
+                                } else if (showItemSlot) {
+                                    color = darkColor;
+                                }
+                            }
+                        }
+
+                        guiGraphics.pose().pushMatrix();
+                        guiGraphics.pose().translate(xPos + 0.5f, yPos + 0.5f);
+                        guiGraphics.pose().scale(durabilityScale);
+                        guiGraphics.drawString(mc.font, durabilityString, 0, 0, color, color != darkColor);
+                        guiGraphics.pose().popMatrix();
+                    }
                     i++;
                 }
             }

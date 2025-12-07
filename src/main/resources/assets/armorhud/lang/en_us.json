@@ -7,6 +7,8 @@
   "armorhud.configuration.scale": "Scale",
   "armorhud.configuration.spacing": "Spacing",
   "armorhud.configuration.showHotbarSlot": "Show Hotbar",
-  "armorhud.configuration.showDurabilityBar": "Show Durability",
+  "armorhud.configuration.showDurabilityBar": "Show Durability Bar",
+  "armorhud.configuration.durabilityNumber": "Durability Number",
+  "armorhud.configuration.durabilityNumberColor": "Color of Durability Number",
   "armorhud.configuration.visible": "Show Armor HUD"
 } 
