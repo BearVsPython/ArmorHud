@@ -1,5 +1,6 @@
 package com.bearvspython.armorhud;
 
+import com.mojang.blaze3d.pipeline.RenderPipeline;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -12,6 +13,7 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.gui.GuiLayer;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 public class ArmorHudOverlay {
 
@@ -36,16 +38,9 @@ public class ArmorHudOverlay {
                 return;
             }
 
-            ItemStack[] armorStack = new ItemStack[4];
-            for (int i = 3; i >= 0; i--) {
-                //armorStack[(3 - i)] = mc.player.getInventory().getItem(Inventory.INVENTORY_SIZE + i);
-                armorStack[i] = mc.player.getInventory().getItem(Inventory.INVENTORY_SIZE + i);
-            }
-
             // Get screen width and height
             int screenWidth = mc.getWindow().getGuiScaledWidth();
             int screenHeight = mc.getWindow().getGuiScaledHeight();
-
 
             // Calculate reference points based on anchor settings
             int xReference;
@@ -65,40 +60,57 @@ public class ArmorHudOverlay {
             }
 
             // Use config values
-            float scale = Mth.clamp(Config.scale.getAsInt()/50f, 0.2f, 2f);
+            float scale = Mth.clamp(Config.scale.get()/50f, 0.25f, 2f);
             int spacing = Config.spacing.getAsInt();
             boolean isVertical = Config.layoutStyle.get() == Config.LayoutStyle.VERTICAL;
             boolean showDurabilityBar = Config.showDurabilityBar.getAsBoolean();
             boolean showItemSlot = Config.showHotbarSlot.getAsBoolean();
-            int xPosition = Config.horizontalOffset.get();
-            int yPosition = Config.verticalOffset.get();
+            float yPosition = (float) (double) Config.verticalOffset.get();
+            float xPosition = (float) (double) Config.horizontalOffset.get();
 
-            // Adjust x and y position to be relative to the center of the armor HUD
+            // Get armor items
             int itemCount = 0;
-
-            for (ItemStack stack : armorStack) {
+            ItemStack[] armorStack = new ItemStack[4];
+            for (int i = 3; i >= 0; i--) {
+                ItemStack stack = mc.player.getInventory().getItem(Inventory.INVENTORY_SIZE + i);
                 if (!stack.isEmpty()) {
                     itemCount++;
                 }
+                if (isVertical) {
+                    armorStack[i] = stack;
+                } else {
+                    armorStack[(3 - i)] = stack;
+                }
             }
 
-            int centeringOffsetX = 0;
-            int centeringOffsetY = 0;
+            // Adjust x and y position to be relative to the center of the armor HUD
+            float centeringOffsetX;
+            float centeringOffsetY;
 
             if (isVertical) {
                 if (showItemSlot) {
-                    centeringOffsetX = (int) (ITEM_ICON_SIZE * scale/2);
+                    centeringOffsetY = (float) -(((((itemCount/2) * (21 + spacing)) + spacing) / 2) + 2.5);
                 } else {
-                    centeringOffsetX = (int) (ITEM_ICON_SIZE * scale/2);
+                    centeringOffsetY = (float) -((((itemCount/2) * (ITEM_ICON_SIZE + spacing)) + spacing) / 2);
                 }
+
+                centeringOffsetX = (ITEM_ICON_SIZE/2);
             } else {
+                if (showItemSlot) {
+                    centeringOffsetX = (float) ((((itemCount * (21 + spacing)) - spacing) / 2) - 2.5);
+                } else {
+                    centeringOffsetX = (float) (((itemCount * (ITEM_ICON_SIZE + spacing)) - spacing) / 2);
+                }
 
+                centeringOffsetY = (ITEM_ICON_SIZE/2);
             }
+            centeringOffsetY *= scale;
+            centeringOffsetX *= scale;
 
-
-            //
+            // Apply the centering offset
             xPosition -= centeringOffsetX;
             yPosition -= centeringOffsetY;
+
             // Adjust starting position based on anchor points
             xPosition += xReference;
             yPosition += yReference;
@@ -108,9 +120,6 @@ public class ArmorHudOverlay {
             guiGraphics.pose().pushMatrix();
             guiGraphics.pose().translate(xPosition, yPosition);
             guiGraphics.pose().scale(scale);
-
-            int xLeftExtent = xPosition;
-            int yBottomExtent = yPosition;
 
             int i = 0;
             for (ItemStack stack : armorStack) {
@@ -126,6 +135,8 @@ public class ArmorHudOverlay {
                     }
 
                     // Render armor item
+//                    guiGraphics.fill(RenderPipelines.GUI, xPos, yPos, xPos + 16, yPos + 16, 0xFFFF0000);
+//                    guiGraphics.fill(RenderPipelines.GUI, xPos + 1, yPos + 1, xPos + 15, yPos + 15, 0xFF0000FF);
                     guiGraphics.renderItem(stack, xPos, yPos);
 
                     // Render durability bar if enabled
@@ -146,13 +157,7 @@ public class ArmorHudOverlay {
                     i++;
                 }
             }
-
             guiGraphics.pose().popMatrix();
-
-            // reference point for debugging
-            guiGraphics.fill(RenderPipelines.GUI, xReference - 1, yReference - 1, xReference + 2, yReference + 2, 0xFFFFFFFF);
-            // estimated bottom left extents for reference
-            guiGraphics.fill(RenderPipelines.GUI, xLeftExtent - 1, yBottomExtent - 1, xLeftExtent + 1, yBottomExtent + 1, 0xFFFF0000);
         }
     }
 

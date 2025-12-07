@@ -71,13 +71,13 @@ public class Config {
     }
 
 
-    public static final ModConfigSpec.ConfigValue<Integer> horizontalOffset = BUILDER
+    public static final ModConfigSpec.ConfigValue<Double> horizontalOffset = BUILDER
             .comment("X Position of the armor HUD from the anchor point")
-            .define("horizontalOffset", 0);
+            .define("horizontalOffset", 0.0);
 
-    public static final ModConfigSpec.ConfigValue<Integer> verticalOffset = BUILDER
+    public static final ModConfigSpec.ConfigValue<Double> verticalOffset = BUILDER
             .comment("Y Position of the armor HUD from the anchor point")
-            .define("verticalOffset", 0);
+            .define("verticalOffset", 0.0);
 
     public static final ModConfigSpec.EnumValue<LayoutStyle> layoutStyle = BUILDER
             .comment("Layout style of the armor HUD")
