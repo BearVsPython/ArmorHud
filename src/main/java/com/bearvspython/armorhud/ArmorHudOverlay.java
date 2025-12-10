@@ -70,6 +70,10 @@ public class ArmorHudOverlay {
                 }
             }
 
+            if (itemCount == 0) {
+                return;
+            }
+
             // Adjust x and y position to be relative to the center of the armor HUD
             float centeringOffsetX;
             float centeringOffsetY;
