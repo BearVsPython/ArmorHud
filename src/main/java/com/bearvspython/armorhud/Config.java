@@ -97,7 +97,7 @@ public class Config {
 
     public static final ModConfigSpec.ConfigValue<Double> horizontalOffset = BUILDER
             .comment("X Position of the armor HUD from the anchor point")
-            .define("horizontalOffset", 16.0);
+            .define("horizontalOffset", 11.0);
 
     public static final ModConfigSpec.ConfigValue<Double> verticalOffset = BUILDER
             .comment("Y Position of the armor HUD from the anchor point")
@@ -115,9 +115,9 @@ public class Config {
             .comment("Anchor point for the armor HUD")
             .defineEnum("horizontalAnchor", AnchorPoint.Horizontal.LEFT);
 
-    public static final ModConfigSpec.IntValue scale = BUILDER
+    public static final ModConfigSpec.DoubleValue scale = BUILDER
             .comment("Size of each armor piece in the HUD")
-            .defineInRange("scale", 65, 0, 100);
+            .defineInRange("scale", 1.0, 0.25, 2.0);
 
     public static final ModConfigSpec.IntValue spacing = BUILDER
             .comment("Spacing between armor boxes in the HUD")
@@ -133,7 +133,7 @@ public class Config {
 
     public static final ModConfigSpec.EnumValue<DurabilityNumber> durabilityNumber = BUILDER
             .comment("Show number above armor pieces in the HUD")
-            .defineEnum("durabilityNumber", DurabilityNumber.NUMBER_ONLY);
+            .defineEnum("durabilityNumber", DurabilityNumber.OFF);
 
     public static final ModConfigSpec.EnumValue<DurabilityNumberColor> durabilityNumberColor = BUILDER
             .comment("Color style for durability number")

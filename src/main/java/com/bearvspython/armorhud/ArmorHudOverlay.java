@@ -1,6 +1,5 @@
 package com.bearvspython.armorhud;
 
-import com.mojang.blaze3d.pipeline.RenderPipeline;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -13,7 +12,7 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.gui.GuiLayer;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
-import net.neoforged.neoforge.common.ModConfigSpec;
+import org.jetbrains.annotations.NotNull;
 
 public class ArmorHudOverlay {
 
@@ -31,7 +30,7 @@ public class ArmorHudOverlay {
         public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(ArmorHud.MODID, "armor_hud");
 
         @Override
-        public void render(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
+        public void render(@NotNull GuiGraphics guiGraphics, @NotNull DeltaTracker deltaTracker) {
             Minecraft mc = Minecraft.getInstance();
 
             if (!Config.visible.getAsBoolean() || mc.options.hideGui || mc.player == null || mc.gameMode == null) {
@@ -44,7 +43,7 @@ public class ArmorHudOverlay {
 
 
             // Use config values
-            float scale = Mth.clamp(Config.scale.get()/50f, 0.25f, 2f);
+            float scale = (float) Config.scale.getAsDouble();
             int spacing = Config.spacing.getAsInt();
             boolean isVertical = Config.layoutStyle.get() == Config.LayoutStyle.VERTICAL;
             boolean showDurabilityBar = Config.showDurabilityBar.getAsBoolean();
@@ -80,20 +79,20 @@ public class ArmorHudOverlay {
 
             if (isVertical) {
                 if (showItemSlot) {
-                    centeringOffsetY = (float) -(((((itemCount/2) * (21 + spacing)) + spacing) / 2) + 2.5);
+                    centeringOffsetY = (float) -(((double) (((itemCount / 2) * (21 + spacing)) + spacing) / 2) + 2.5);
                 } else {
                     centeringOffsetY = (float) -((((itemCount/2) * (ITEM_ICON_SIZE + spacing)) + spacing) / 2);
                 }
 
-                centeringOffsetX = (ITEM_ICON_SIZE/2);
+                centeringOffsetX = ((float) ITEM_ICON_SIZE /2);
             } else {
                 if (showItemSlot) {
-                    centeringOffsetX = (float) ((((itemCount * (21 + spacing)) - spacing) / 2) - 2.5);
+                    centeringOffsetX = (float) (((double) ((itemCount * (21 + spacing)) - spacing) / 2) - 2.5);
                 } else {
                     centeringOffsetX = (float) (((itemCount * (ITEM_ICON_SIZE + spacing)) - spacing) / 2);
                 }
 
-                centeringOffsetY = (ITEM_ICON_SIZE/2);
+                centeringOffsetY = ((float) ITEM_ICON_SIZE /2);
             }
             centeringOffsetY *= scale;
             centeringOffsetX *= scale;
@@ -103,7 +102,7 @@ public class ArmorHudOverlay {
             yPosition -= centeringOffsetY;
 
             // Calculate reference points based on anchor settings
-            int xReference;
+            int xReference = 0;
             switch (Config.horizontalAnchor.get()) {
                 case LEFT -> {
                     xReference = 0;
@@ -117,13 +116,9 @@ public class ArmorHudOverlay {
                     xReference = screenWidth;
                     xPosition += (float) (double) -Config.horizontalOffset.get();
                 }
-                default -> {
-                    xReference = 0;
-                    xPosition += (float) (double) Config.horizontalOffset.get();
-                }
             }
 
-            int yReference;
+            int yReference = 0;
             switch (Config.verticalAnchor.get()) {
                 case TOP -> {
                     yReference = 0;
@@ -136,10 +131,6 @@ public class ArmorHudOverlay {
                 case BOTTOM -> {
                     yReference = screenHeight;
                     yPosition += (float) (double) -Config.verticalOffset.get();
-                }
-                default -> {
-                    yReference = 0;
-                    yPosition += (float) (double) Config.verticalOffset.get();
                 }
             }
 
@@ -157,8 +148,9 @@ public class ArmorHudOverlay {
             for (ItemStack stack : armorStack) {
                 if (!stack.isEmpty()) {
 
-                    int xPos = (((isVertical ? 0 : (i * (spacing + (showItemSlot ? (21) : ITEM_ICON_SIZE))))));
-                    int yPos = (((isVertical ? - (i * (spacing + (showItemSlot ? (21) : ITEM_ICON_SIZE))) : 0)));
+                    int i1 = i * (spacing + (showItemSlot ? (21) : ITEM_ICON_SIZE));
+                    int xPos = (((isVertical ? 0 : i1)));
+                    int yPos = (((isVertical ? -i1 : 0)));
 
 
                     // Render item slot if enabled
