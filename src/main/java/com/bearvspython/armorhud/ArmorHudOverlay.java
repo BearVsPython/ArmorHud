@@ -32,7 +32,6 @@ public class ArmorHudOverlay {
         @Override
         public void render(@NotNull GuiGraphics guiGraphics, @NotNull DeltaTracker deltaTracker) {
             Minecraft mc = Minecraft.getInstance();
-
             if (!Config.visible.getAsBoolean() || mc.options.hideGui || mc.player == null || mc.gameMode == null) {
                 return;
             }
@@ -195,6 +194,9 @@ public class ArmorHudOverlay {
                                 int percent = Math.round(((float)(stack.getMaxDamage() - stack.getDamageValue()) / (float)stack.getMaxDamage()) * 100f);
                                 durabilityString = percent + "%";
                                 durabilityScale = 0.6f;
+                            }
+                            case OFF -> {
+                                durabilityString = "";
                             }
                         }
                         int darkColor = 0xFF101010;
