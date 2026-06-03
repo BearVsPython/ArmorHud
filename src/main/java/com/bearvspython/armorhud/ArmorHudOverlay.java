@@ -3,14 +3,13 @@ package com.bearvspython.armorhud;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
+import net.minecraft.util.FastColor.ARGB32;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
-import net.neoforged.neoforge.client.gui.GuiLayer;
+import net.minecraft.client.gui.LayeredDraw;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,7 +25,7 @@ public class ArmorHudOverlay {
         event.registerAbove(VanillaGuiLayers.HOTBAR, Overlay.ID, new Overlay());
     }
 
-    public static class Overlay implements GuiLayer {
+    public static class Overlay implements LayeredDraw.Layer {
         public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(ArmorHud.MODID, "armor_hud");
 
         @Override
@@ -139,9 +138,9 @@ public class ArmorHudOverlay {
 
 
 
-            guiGraphics.pose().pushMatrix();
-            guiGraphics.pose().translate(xPosition, yPosition);
-            guiGraphics.pose().scale(scale);
+            guiGraphics.pose().pushPose();
+            guiGraphics.pose().translate(xPosition, yPosition, 0f);
+            guiGraphics.pose().scale(scale, scale, 0f);
 
             int i = 0;
             for (ItemStack stack : armorStack) {
@@ -154,7 +153,7 @@ public class ArmorHudOverlay {
 
                     // Render item slot if enabled
                     if (showItemSlot) {
-                        guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, ITEM_SLOT_TEXTURE, ITEM_SLOT_TEXTURE_WIDTH, ITEM_SLOT_TEXTURE_HEIGHT, 0, 0, xPos-3, yPos-4, 22, 23);
+                        guiGraphics.blitSprite(ITEM_SLOT_TEXTURE, ITEM_SLOT_TEXTURE_WIDTH, ITEM_SLOT_TEXTURE_HEIGHT, 0, 0, xPos-3, yPos-4, 22, 23);
                     }
 
                     // Render armor item
@@ -173,8 +172,8 @@ public class ArmorHudOverlay {
                         x += xPos;
                         y += yPos;
 
-                        guiGraphics.fill(RenderPipelines.GUI, x, y, x + max, y + 2, -16777216);
-                        guiGraphics.fill(RenderPipelines.GUI, x, y, x + barWidth, y + 1, ARGB.opaque(stack.getBarColor()));
+                        guiGraphics.fill(x, y, x + max, y + 2, -16777216);
+                        guiGraphics.fill(x, y, x + barWidth, y + 1, ARGB32.opaque(stack.getBarColor()));
                     }
 
                     if (showDurabilityNumber) {
@@ -205,27 +204,27 @@ public class ArmorHudOverlay {
                         switch (durabilityNumberColor) {
                             case WHITE -> color = lightColor;
                             case BLACK -> color = darkColor;
-                            case MATCH_DURABILITY_BAR -> color = ARGB.opaque(stack.getBarColor());
+                            case MATCH_DURABILITY_BAR -> color = ARGB32.opaque(stack.getBarColor());
                             case AUTO -> {
                                 color = lightColor;
                                 if (!showDurabilityBar) {
-                                    color = ARGB.opaque(stack.getBarColor());
+                                    color = ARGB32.opaque(stack.getBarColor());
                                 } else if (showItemSlot) {
                                     color = darkColor;
                                 }
                             }
                         }
 
-                        guiGraphics.pose().pushMatrix();
-                        guiGraphics.pose().translate(xPos + 0.5f, yPos + 0.5f);
-                        guiGraphics.pose().scale(durabilityScale);
+                        guiGraphics.pose().pushPose();
+                        guiGraphics.pose().translate(xPos + 0.5f, yPos + 0.5f, 0f);
+                        guiGraphics.pose().scale(durabilityScale, durabilityScale, 0f);
                         guiGraphics.drawString(mc.font, durabilityString, 0, 0, color, color != darkColor);
-                        guiGraphics.pose().popMatrix();
+                        guiGraphics.pose().popPose();
                     }
                     i++;
                 }
             }
-            guiGraphics.pose().popMatrix();
+            guiGraphics.pose().popPose();
         }
     }
 
