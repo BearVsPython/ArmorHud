@@ -136,8 +136,6 @@ public class ArmorHudOverlay {
             xPosition += xReference;
             yPosition += yReference;
 
-
-
             guiGraphics.pose().pushPose();
             guiGraphics.pose().translate(xPosition, yPosition, 0f);
             guiGraphics.pose().scale(scale, scale, 0f);
@@ -157,15 +155,21 @@ public class ArmorHudOverlay {
                     }
 
                     // Render armor item
-//                    guiGraphics.fill(RenderPipelines.GUI, xPos, yPos, xPos + 16, yPos + 16, 0xFFFF0000);
-//                    guiGraphics.fill(RenderPipelines.GUI, xPos + 1, yPos + 1, xPos + 15, yPos + 15, 0xFF0000FF);
                     guiGraphics.renderItem(stack, xPos, yPos);
 
+                    IArmor armorItem = new VanillaArmor(stack);
+
+                    if (ArmorHud.CREATE_LOADED) {
+                        if (CreateArmor.isBacktank(stack)) {
+                            armorItem = new CreateArmor(stack);
+                        }
+                    }
+
                     // Render durability bar if enabled
-                    if (showDurabilityBar && stack.isBarVisible()) {
+                    if (showDurabilityBar && armorItem.isBarVisible()) {
 
                         int max = 14;
-                        int barWidth = Mth.clamp(Math.round((float) max - (float) stack.getDamageValue() * (float) max / (float) stack.getMaxDamage()), 0, max);
+                        int barWidth = Mth.clamp(Math.round((float) max - (float) armorItem.getDamageValue() * (float) max / (float) armorItem.getMaxDamage()), 0, max);
                         int x = (int) ((16 - max) / 2f);
                         int y = 13;
 
@@ -173,7 +177,7 @@ public class ArmorHudOverlay {
                         y += yPos;
 
                         guiGraphics.fill(x, y, x + max, y + 2, -16777216);
-                        guiGraphics.fill(x, y, x + barWidth, y + 1, ARGB32.opaque(stack.getBarColor()));
+                        guiGraphics.fill(x, y, x + barWidth, y + 1, ARGB32.opaque(armorItem.getBarColor()));
                     }
 
                     if (showDurabilityNumber) {
@@ -182,15 +186,15 @@ public class ArmorHudOverlay {
                         float durabilityScale = 1f;
                         switch (durabilityNumber) {
                             case NUMBER_ONLY -> {
-                                durabilityString = String.valueOf(stack.getMaxDamage() - stack.getDamageValue());
+                                durabilityString = String.valueOf(armorItem.getMaxDamage() - armorItem.getDamageValue());
                                 durabilityScale = 0.6f;
                             }
                             case NUMBER_AND_MAX -> {
-                                durabilityString = (stack.getMaxDamage() - stack.getDamageValue()) + "/" + stack.getMaxDamage();
+                                durabilityString = (armorItem.getMaxDamage() - armorItem.getDamageValue()) + "/" + armorItem.getMaxDamage();
                                 durabilityScale = 0.365f;
                             }
                             case PERCENTAGE -> {
-                                int percent = Math.round(((float)(stack.getMaxDamage() - stack.getDamageValue()) / (float)stack.getMaxDamage()) * 100f);
+                                int percent = Math.round(((float)(armorItem.getMaxDamage() - armorItem.getDamageValue()) / (float) armorItem.getMaxDamage()) * 100f);
                                 durabilityString = percent + "%";
                                 durabilityScale = 0.6f;
                             }
@@ -204,11 +208,11 @@ public class ArmorHudOverlay {
                         switch (durabilityNumberColor) {
                             case WHITE -> color = lightColor;
                             case BLACK -> color = darkColor;
-                            case MATCH_DURABILITY_BAR -> color = ARGB32.opaque(stack.getBarColor());
+                            case MATCH_DURABILITY_BAR -> color = ARGB32.opaque(armorItem.getBarColor());
                             case AUTO -> {
                                 color = lightColor;
                                 if (!showDurabilityBar) {
-                                    color = ARGB32.opaque(stack.getBarColor());
+                                    color = ARGB32.opaque(armorItem.getBarColor());
                                 } else if (showItemSlot) {
                                     color = darkColor;
                                 }

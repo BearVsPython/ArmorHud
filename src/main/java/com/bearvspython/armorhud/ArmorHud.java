@@ -13,7 +13,7 @@ import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 @Mod(value = ArmorHud.MODID, dist = Dist.CLIENT)
 public class ArmorHud {
     public static final String MODID = "armorhud";
-
+    public static final boolean CREATE_LOADED = net.neoforged.fml.ModList.get().isLoaded("create");
 
     public ArmorHud(IEventBus modEventBus, ModContainer container) {
         // Allows NeoForge to create a config screen for this mod's configs.
