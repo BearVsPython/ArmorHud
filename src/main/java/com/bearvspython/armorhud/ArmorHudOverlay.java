@@ -1,5 +1,6 @@
 package com.bearvspython.armorhud;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -7,6 +8,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.util.FastColor.ARGB32;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.minecraft.client.gui.LayeredDraw;
@@ -22,7 +24,7 @@ public class ArmorHudOverlay {
     private static final int ITEM_ICON_SIZE = 16;
 
     public static void register(RegisterGuiLayersEvent event) {
-        event.registerAbove(VanillaGuiLayers.HOTBAR, Overlay.ID, new Overlay());
+        event.registerBelow(VanillaGuiLayers.HOTBAR, Overlay.ID, new Overlay());
     }
 
     public static class Overlay implements LayeredDraw.Layer {
@@ -150,12 +152,22 @@ public class ArmorHudOverlay {
 
 
                     // Render item slot if enabled
+                    RenderSystem.enableBlend();
+                    guiGraphics.pose().pushPose();
+                    guiGraphics.pose().translate(0f, 0f, -90.0F);
                     if (showItemSlot) {
                         guiGraphics.blitSprite(ITEM_SLOT_TEXTURE, ITEM_SLOT_TEXTURE_WIDTH, ITEM_SLOT_TEXTURE_HEIGHT, 0, 0, xPos-3, yPos-4, 22, 23);
                     }
+                    guiGraphics.pose().popPose();
+                    RenderSystem.disableBlend();
 
                     // Render armor item
-                    guiGraphics.renderItem(stack, xPos, yPos);
+                    guiGraphics.pose().pushPose();
+                    guiGraphics.pose().translate(0, 0, 100);
+                    guiGraphics.renderItem(mc.player, stack, xPos, yPos, 0);
+                    //renderSlot(guiGraphics, xPos, yPos, deltaTracker, mc.player, stack, i);
+                    guiGraphics.pose().popPose();
+
 
                     IArmor armorItem = new VanillaArmor(stack);
 
@@ -230,7 +242,23 @@ public class ArmorHudOverlay {
             }
             guiGraphics.pose().popPose();
         }
+
+        private void renderSlot(GuiGraphics g, int x, int y, DeltaTracker delta, Player player, ItemStack itemstack, int seed) {
+            if (!itemstack.isEmpty()) {
+                float f = (float)itemstack.getPopTime() - delta.getGameTimeDeltaPartialTick(false);
+                if (f > 0.0F) {
+                    float f1 = 1.0F + f / 5.0F;
+                    g.pose().pushPose();
+                    g.pose().translate((float)(x + 8), (float)(y + 12), 0.0F);
+                    g.pose().scale(1.0F / f1, (f1 + 1.0F) / 2.0F, 1.0F);
+                    g.pose().translate((float)(-(x + 8)), (float)(-(y + 12)), 0.0F);
+                }
+
+                g.renderItem(player, itemstack, x, y, seed);
+                if (f > 0.0F) {
+                    g.pose().popPose();
+                }
+            }
+        }
     }
-
-
 }
