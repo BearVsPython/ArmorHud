@@ -20,6 +20,7 @@ group = mod_group_id
 repositories {
     // Add here additional repositories if required by some of the dependencies below.
     maven { url = "https://maven.createmod.net" }
+    maven {url = "https://maven.theillusivec4.top/"}
 }
 
 base {
@@ -108,6 +109,8 @@ configurations {
 }
 
 dependencies {
+    runtimeOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}"
+    compileOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}:api"
     compileOnly "com.simibubi.create:create-${minecraft_version}:${create_version}:slim"
 }
 

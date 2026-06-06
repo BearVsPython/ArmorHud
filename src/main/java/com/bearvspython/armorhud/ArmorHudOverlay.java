@@ -13,6 +13,8 @@ import net.minecraft.client.gui.LayeredDraw;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+
 public class ArmorHudOverlay {
 
 
@@ -31,7 +33,7 @@ public class ArmorHudOverlay {
         @Override
         public void render(@NotNull GuiGraphics guiGraphics, @NotNull DeltaTracker deltaTracker) {
             Minecraft mc = Minecraft.getInstance();
-            if (!Config.visible.getAsBoolean() || mc.options.hideGui || mc.player == null || mc.gameMode == null) {
+            if (Config.visibility.get() == Config.Visibility.NEVER || mc.options.hideGui || mc.player == null || mc.gameMode == null) {
                 return;
             }
 
@@ -44,6 +46,7 @@ public class ArmorHudOverlay {
             float scale = (float) Config.scale.getAsDouble();
             int spacing = Config.spacing.getAsInt();
             boolean isVertical = Config.layoutStyle.get() == Config.LayoutStyle.VERTICAL;
+            boolean hideAbove50Percent = Config.visibility.get() == Config.Visibility.LOW_DURABILITY;
             boolean showDurabilityBar = Config.showDurabilityBar.getAsBoolean();
             boolean showDurabilityNumber = Config.durabilityNumber.get() != Config.DurabilityNumber.OFF;
             Config.DurabilityNumber durabilityNumber = Config.durabilityNumber.get();
@@ -53,44 +56,74 @@ public class ArmorHudOverlay {
             float xPosition = 0f;
 
             // Get armor items
-            int itemCount = 0;
-            ItemStack[] armorStack = new ItemStack[4];
-            for (int i = 3; i >= 0; i--) {
+            ArrayList<ItemStack> armorStack = new ArrayList<ItemStack>();
+            for (int i = 0; i <= 3; i++) {
                 ItemStack stack = mc.player.getInventory().getItem(Inventory.INVENTORY_SIZE + i);
-                if (!stack.isEmpty()) {
-                    itemCount++;
+                if (stack.equals(ItemStack.EMPTY)) {
+                    continue;
                 }
-                if (isVertical) {
-                    armorStack[i] = stack;
-                } else {
-                    armorStack[(3 - i)] = stack;
-                }
+                armorStack.add(stack);
             }
 
-            if (itemCount == 0) {
+            if (ArmorHud.CURIOS_LOADED) {
+                ArrayList<ItemStack> curiosArmor = CuriosCompat.getCuriosItems(mc.player);
+                curiosArmor.addAll(armorStack);
+                armorStack = curiosArmor;
+            }
+
+            if (armorStack.isEmpty()) {
                 return;
+            }
+
+            ArrayList<IArmor> armorItems = new ArrayList<IArmor>();
+
+            for (ItemStack item : armorStack) {
+
+                if (ArmorHud.CREATE_LOADED) {
+                    if (CreateArmor.isBacktank(item)) {
+                        armorItems.add(new CreateArmor(item));
+                        continue;
+                    }
+                }
+
+                if (item.getMaxDamage() == 0) {
+                    continue;
+                }
+
+                armorItems.add(new VanillaArmor(item));
+            }
+
+            if (hideAbove50Percent) {
+                for (int i = armorItems.size() - 1; i >= 0; i--) {
+                    IArmor armor = armorItems.get(i);
+                    if (((armor.getMaxDamage() - armor.getDamageValue()) / (float) armor.getMaxDamage()) >= 0.5) {
+                        armorItems.remove(i);
+                    }
+                }
             }
 
             // Adjust x and y position to be relative to the center of the armor HUD
             float centeringOffsetX;
             float centeringOffsetY;
 
+            int itemCount = armorItems.size();
+
             if (isVertical) {
                 if (showItemSlot) {
-                    centeringOffsetY = (float) -(((double) (((itemCount / 2) * (21 + spacing)) + spacing) / 2) + 2.5);
+                    centeringOffsetY = (float) -(((double) ((( itemCount ) * ( 21 + spacing )) - spacing ) / 2 ) + 2.5 );
                 } else {
-                    centeringOffsetY = (float) -((((itemCount/2) * (ITEM_ICON_SIZE + spacing)) + spacing) / 2);
+                    centeringOffsetY = (float) -(((( itemCount ) * ( ITEM_ICON_SIZE + spacing )) - spacing ) / 2 );
                 }
 
-                centeringOffsetX = ((float) ITEM_ICON_SIZE /2);
+                centeringOffsetX = ((float) ITEM_ICON_SIZE / 2 );
             } else {
                 if (showItemSlot) {
-                    centeringOffsetX = (float) (((double) ((itemCount * (21 + spacing)) - spacing) / 2) - 2.5);
+                    centeringOffsetX = (float) (((double) (( itemCount * ( 21 + spacing )) - spacing ) / 2 ) - 2.5 );
                 } else {
-                    centeringOffsetX = (float) (((itemCount * (ITEM_ICON_SIZE + spacing)) - spacing) / 2);
+                    centeringOffsetX = (float) ((( itemCount * ( ITEM_ICON_SIZE + spacing )) - spacing) / 2 );
                 }
 
-                centeringOffsetY = ((float) ITEM_ICON_SIZE /2);
+                centeringOffsetY = ((float) ITEM_ICON_SIZE / 2 );
             }
             centeringOffsetY *= scale;
             centeringOffsetX *= scale;
@@ -141,9 +174,7 @@ public class ArmorHudOverlay {
             guiGraphics.pose().scale(scale, scale, 0f);
 
             int i = 0;
-            for (ItemStack stack : armorStack) {
-                if (!stack.isEmpty()) {
-
+            for (IArmor armorItem : armorItems) {
                     int i1 = i * (spacing + (showItemSlot ? (21) : ITEM_ICON_SIZE));
                     int xPos = (((isVertical ? 0 : i1)));
                     int yPos = (((isVertical ? -i1 : 0)));
@@ -155,15 +186,7 @@ public class ArmorHudOverlay {
                     }
 
                     // Render armor item
-                    guiGraphics.renderItem(stack, xPos, yPos);
-
-                    IArmor armorItem = new VanillaArmor(stack);
-
-                    if (ArmorHud.CREATE_LOADED) {
-                        if (CreateArmor.isBacktank(stack)) {
-                            armorItem = new CreateArmor(stack);
-                        }
-                    }
+                    guiGraphics.renderItem(armorItem.getStack(), xPos, yPos);
 
                     // Render durability bar if enabled
                     if (showDurabilityBar && armorItem.isBarVisible()) {
@@ -226,7 +249,6 @@ public class ArmorHudOverlay {
                         guiGraphics.pose().popPose();
                     }
                     i++;
-                }
             }
             guiGraphics.pose().popPose();
         }

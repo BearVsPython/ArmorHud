@@ -2,6 +2,8 @@ package com.bearvspython.armorhud;
 
 import net.neoforged.neoforge.common.ModConfigSpec;
 
+import java.util.Locale;
+
 public class Config {
     private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
 
@@ -94,6 +96,15 @@ public class Config {
         }
     }
 
+    public enum Visibility {
+        ALWAYS,
+        LOW_DURABILITY,
+        NEVER;
+
+        @Override
+        public String toString() { return name().toLowerCase(); }
+    }
+
 
     public static final ModConfigSpec.ConfigValue<Double> horizontalOffset = BUILDER
             .comment("X Position of the armor HUD from the anchor point")
@@ -139,9 +150,9 @@ public class Config {
             .comment("Color style for durability number")
             .defineEnum("durabilityNumberColor", DurabilityNumberColor.WHITE);
 
-    public static final ModConfigSpec.BooleanValue visible = BUILDER
+    public static final ModConfigSpec.EnumValue<Visibility> visibility = BUILDER
             .comment("Toggle the visibility of the armor HUD")
-            .define("visible", true);
+            .defineEnum("visibility", Visibility.ALWAYS);
 
     static final ModConfigSpec SPEC = BUILDER.build();
 }

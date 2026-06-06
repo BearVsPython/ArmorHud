@@ -26,4 +26,7 @@ public class VanillaArmor implements IArmor {
         return itemstack.isBarVisible();
     }
 
+    public ItemStack getStack() {
+        return this.itemstack;
+    }
 }

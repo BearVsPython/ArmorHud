@@ -30,4 +30,8 @@ public class CreateArmor implements IArmor {
     public static boolean isBacktank(ItemStack itemstack) {
         return itemstack.getItem() instanceof BacktankItem;
     }
+
+    public ItemStack getStack() {
+        return itemstack;
+    }
 }

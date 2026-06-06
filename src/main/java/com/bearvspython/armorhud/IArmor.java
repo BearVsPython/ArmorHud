@@ -8,4 +8,5 @@ public interface IArmor {
     public int getDamageValue();
     public int getBarColor();
     public boolean isBarVisible();
+    public ItemStack getStack();
 }
