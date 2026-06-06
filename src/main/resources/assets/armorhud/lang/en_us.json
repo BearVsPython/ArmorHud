@@ -10,5 +10,5 @@
   "armorhud.configuration.showDurabilityBar": "Show Durability Bar",
   "armorhud.configuration.durabilityNumber": "Durability Number",
   "armorhud.configuration.durabilityNumberColor": "Color of Durability Number",
-  "armorhud.configuration.visible": "Show Armor HUD"
+  "armorhud.configuration.visibility": "Show Armor HUD"
 } 
