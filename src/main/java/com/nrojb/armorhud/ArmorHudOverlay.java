@@ -1,4 +1,4 @@
-package com.bearvspython.armorhud;
+package com.nrojb.armorhud;
 
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;

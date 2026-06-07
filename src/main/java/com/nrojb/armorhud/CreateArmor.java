@@ -1,4 +1,4 @@
-package com.bearvspython.armorhud;
+package com.nrojb.armorhud;
 
 import com.simibubi.create.content.equipment.armor.BacktankUtil;
 import com.simibubi.create.content.equipment.armor.BacktankItem;
