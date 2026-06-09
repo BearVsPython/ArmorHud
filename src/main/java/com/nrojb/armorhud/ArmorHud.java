@@ -15,6 +15,7 @@ public class ArmorHud {
     public static final String MODID = "armorhud";
     public static final boolean CREATE_LOADED = net.neoforged.fml.ModList.get().isLoaded("create");
     public static final boolean CURIOS_LOADED = net.neoforged.fml.ModList.get().isLoaded("curios");
+    public static final boolean CREATESA_LOADED = net.neoforged.fml.ModList.get().isLoaded("create_sa");
 
     public ArmorHud(IEventBus modEventBus, ModContainer container) {
         // Allows NeoForge to create a config screen for this mod's configs.

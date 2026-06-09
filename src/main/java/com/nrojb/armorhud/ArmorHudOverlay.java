@@ -48,6 +48,7 @@ public class ArmorHudOverlay {
             boolean isVertical = Config.layoutStyle.get() == Config.LayoutStyle.VERTICAL;
             boolean hideAbove50Percent = Config.visibility.get() == Config.Visibility.LOW_DURABILITY;
             boolean showDurabilityBar = Config.showDurabilityBar.getAsBoolean();
+            boolean useVanillaDurabilityBar = Config.useVanillaDurabilityBar.getAsBoolean();
             boolean showDurabilityNumber = Config.durabilityNumber.get() != Config.DurabilityNumber.OFF;
             Config.DurabilityNumber durabilityNumber = Config.durabilityNumber.get();
             Config.DurabilityNumberColor durabilityNumberColor = Config.durabilityNumberColor.get();
@@ -86,8 +87,16 @@ public class ArmorHudOverlay {
                     }
                 }
 
-                if (item.getMaxDamage() == 0) {
-                    continue;
+                if (ArmorHud.CREATESA_LOADED) {
+                    if (CreateSAArmor.isCreateSAArmor(item)) {
+                        armorItems.add(new CreateSAArmor(item));
+                        continue;
+                    }
+                }
+                if (!useVanillaDurabilityBar) {
+                    if (item.getMaxDamage() == 0) {
+                        continue;
+                    }
                 }
 
                 armorItems.add(new VanillaArmor(item));
@@ -186,25 +195,28 @@ public class ArmorHudOverlay {
                     }
 
                     // Render armor item
-                    guiGraphics.renderItem(armorItem.getStack(), xPos, yPos);
+                    armorItem.render(guiGraphics, xPos, yPos);
 
                     // Render durability bar if enabled
                     if (showDurabilityBar && armorItem.isBarVisible()) {
 
-                        int max = 14;
-                        int barWidth = Mth.clamp(Math.round((float) max - (float) armorItem.getDamageValue() * (float) max / (float) armorItem.getMaxDamage()), 0, max);
-                        int x = (int) ((16 - max) / 2f);
-                        int y = 13;
+                        if (useVanillaDurabilityBar) {
+                            guiGraphics.renderItemDecorations(mc.font, armorItem.getStack(), xPos, yPos);
+                        } else {
+                            int max = 14;
+                            int barWidth = Mth.clamp(Math.round((float) max - (float) armorItem.getDamageValue() * (float) max / (float) armorItem.getMaxDamage()), 0, max);
+                            int x = (int) ((16 - max) / 2f);
+                            int y = 13;
 
-                        x += xPos;
-                        y += yPos;
+                            x += xPos;
+                            y += yPos;
 
-                        guiGraphics.fill(x, y, x + max, y + 2, -16777216);
-                        guiGraphics.fill(x, y, x + barWidth, y + 1, ARGB32.opaque(armorItem.getBarColor()));
+                            guiGraphics.fill(x, y, x + max, y + 2, -16777216);
+                            guiGraphics.fill(x, y, x + barWidth, y + 1, ARGB32.opaque(armorItem.getBarColor()));
+                        }
                     }
 
                     if (showDurabilityNumber) {
-
                         String durabilityString = "";
                         float durabilityScale = 1f;
                         switch (durabilityNumber) {
@@ -217,7 +229,7 @@ public class ArmorHudOverlay {
                                 durabilityScale = 0.365f;
                             }
                             case PERCENTAGE -> {
-                                int percent = Math.round(((float)(armorItem.getMaxDamage() - armorItem.getDamageValue()) / (float) armorItem.getMaxDamage()) * 100f);
+                                int percent = Math.round(((float) (armorItem.getMaxDamage() - armorItem.getDamageValue()) / (float) armorItem.getMaxDamage()) * 100f);
                                 durabilityString = percent + "%";
                                 durabilityScale = 0.6f;
                             }

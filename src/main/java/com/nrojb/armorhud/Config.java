@@ -154,5 +154,9 @@ public class Config {
             .comment("Toggle the visibility of the armor HUD")
             .defineEnum("visibility", Visibility.ALWAYS);
 
+    public static final ModConfigSpec.BooleanValue useVanillaDurabilityBar = BUILDER
+            .comment("Toggle using the vanilla durability bar instead of centered bar (may be used to fix mods without support)")
+            .define("useVanillaDurabilityBar", false);
+
     static final ModConfigSpec SPEC = BUILDER.build();
 }

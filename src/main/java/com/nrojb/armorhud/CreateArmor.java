@@ -2,6 +2,7 @@ package com.nrojb.armorhud;
 
 import com.simibubi.create.content.equipment.armor.BacktankUtil;
 import com.simibubi.create.content.equipment.armor.BacktankItem;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.item.ItemStack;
 
 public class CreateArmor implements IArmor {
@@ -25,6 +26,10 @@ public class CreateArmor implements IArmor {
 
     public boolean isBarVisible() {
         return true;
+    }
+
+    public void render(GuiGraphics guiGraphics, int xPos, int yPos) {
+        guiGraphics.renderItem(itemstack, xPos, yPos);
     }
 
     public static boolean isBacktank(ItemStack itemstack) {
